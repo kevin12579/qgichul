@@ -1,0 +1,10 @@
+.gradle/
+build/
+bin/
+out/
+.idea/
+.vscode/
+*.iml
+HELP.md
+src/main/resources/application-local.properties
+.env

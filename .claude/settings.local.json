@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew compileJava -x test --console=plain)",
+      "Bash(npm run *)",
+      "Bash(./gradlew compileJava --no-daemon)",
+      "Bash(python -c \"import main; print\\('AI imports OK'\\); print\\([r.path for r in main.app.routes if hasattr\\(r,'path'\\)]\\)\")",
+      "Bash(py -c \"import main; print\\('AI imports OK'\\); [print\\(r.path\\) for r in main.app.routes if hasattr\\(r,'path'\\)]\")",
+      "Bash(where python *)",
+      "Bash(py -3 -V)",
+      "Bash(py -3 -m py_compile main.py routers/analysis.py routers/home_recommend.py routers/question_generator.py routers/pdf_parser.py models/schemas.py utils/openai_client.py prompts/templates.py)",
+      "PowerShell([Convert]::ToBase64String\\([System.Security.Cryptography.RandomNumberGenerator]::GetBytes\\(64\\)\\))",
+      "PowerShell($rng = [System.Security.Cryptography.RNGCryptoServiceProvider]::new\\(\\); $bytes = New-Object byte[] 64; $rng.GetBytes\\($bytes\\); [Convert]::ToBase64String\\($bytes\\))",
+      "Bash(dir /S /B)",
+      "Bash(findstr /E \".java\")",
+      "Bash(del \"C:\\\\Users\\\\kevin\\\\OneDrive\\\\Desktop\\\\smu\\\\dev_source\\\\GitWork\\\\qgichul\\\\qgichul-frontend\\\\src\\\\api\\\\mockHandlers.js\")",
+      "Bash(python -c \"import pdfplumber; print\\(pdfplumber.__version__\\)\")",
+      "Bash(pip install *)",
+      "Bash(python debug_extract.py)",
+      "Bash(python debug_parse_check.py)",
+      "Bash(python debug_columns.py)"
+    ]
+  }
+}

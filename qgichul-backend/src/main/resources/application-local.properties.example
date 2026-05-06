@@ -1,0 +1,9 @@
+# application-local.properties 작성 예시 (이 파일은 커밋 OK)
+# 실제 운영 비밀은 application-local.properties 에 채워 넣되, gitignore 처리할 것.
+
+DB_URL=jdbc:mysql://<host>:4000/<db>?sslMode=VERIFY_IDENTITY&tlsVersions=TLSv1.2,TLSv1.3
+DB_USERNAME=<your_db_user>
+DB_PASSWORD=<your_db_password>
+JWT_SECRET=<openssl rand -base64 64 결과>
+JWT_EXPIRATION=86400000
+AI_SERVER_URL=http://localhost:8000

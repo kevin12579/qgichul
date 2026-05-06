@@ -1,0 +1,12 @@
+# 루트 레벨 시크릿
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
