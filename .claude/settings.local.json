@@ -18,7 +18,23 @@
       "Bash(pip install *)",
       "Bash(python debug_extract.py)",
       "Bash(python debug_parse_check.py)",
-      "Bash(python debug_columns.py)"
+      "Bash(python debug_columns.py)",
+      "Bash(python debug_q1.py)",
+      "Bash(python -c ' *)",
+      "Bash(cp \"C:/Users/kevin/Downloads/정보처리산업기사20200822\\(교사용\\).pdf\" \"C:/Users/kevin/OneDrive/Desktop/smu/dev_source/GitWork/qgichul/qgichul-ai/pdfs/정보처리산업기사_2020_3.pdf\")",
+      "Bash(cp \"C:/Users/kevin/Downloads/정보처리산업기사20200822\\(해설집\\).pdf\" \"C:/Users/kevin/OneDrive/Desktop/smu/dev_source/GitWork/qgichul/qgichul-ai/pdfs/정보처리산업기사_2020_3_해설.pdf\")",
+      "Bash(python debug_folder.py)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\kevin\\\\OneDrive\\\\Desktop\\\\smu\\\\dev_source\\\\GitWork\\\\qgichul\" -Force | Select-Object Name, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"DIR\"}else{\"FILE\"}}} | Format-Table -AutoSize)",
+      "Bash(findstr /i \"dockerignore gitignore\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\kevin\\\\OneDrive\\\\Desktop\\\\smu\\\\dev_source\\\\GitWork\\\\qgichul\\\\qgichul-ai\" -Force)",
+      "Bash(Select-Object Name)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\kevin\\\\OneDrive\\\\Desktop\\\\smu\\\\dev_source\\\\GitWork\\\\qgichul\\\\qgichul-ai\" -Force | ForEach-Object { $_.Name })",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s http://localhost:8080/actuator/health)",
+      "Bash(curl *)",
+      "Bash(git rm *)",
+      "Bash(git commit *)",
+      "Bash(git add *)"
     ]
   }
 }

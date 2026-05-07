@@ -1,5 +1,11 @@
 FROM python:3.11-slim
 
+ENV PYTHONUTF8=1
+ENV PYTHONIOENCODING=utf-8
+ENV PYTHONUNBUFFERED=1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
