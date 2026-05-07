@@ -43,21 +43,22 @@
 
 ## 주요 기능
 
-| 기능 | 설명 |
-|------|------|
-| **자격증 시험 응시** | 자격증별 기출문제를 타이머와 함께 풀어볼 수 있습니다 |
-| **성적 분석** | 과목별·단원별 정답률을 차트로 시각화합니다 |
-| **AI 약점 분석** | 오답 데이터를 GPT-4o에 전달해 취약 단원과 학습 우선순위를 분석합니다 |
-| **AI 문제 생성** | 취약 단원의 유사 문제를 자동 생성하여 반복 학습 환경을 제공합니다 |
-| **오답 노트** | 오답 문제에 메모를 추가하고 AI 분석 결과를 저장합니다 |
-| **학습 대시보드** | 전체 학습 현황, 통계, 추천 콘텐츠를 한눈에 확인합니다 |
-| **자격증 추천** | 학습 이력을 기반으로 다음에 도전할 자격증을 추천합니다 |
+| 기능                 | 설명                                                                 |
+| -------------------- | -------------------------------------------------------------------- |
+| **자격증 시험 응시** | 자격증별 기출문제를 타이머와 함께 풀어볼 수 있습니다                 |
+| **성적 분석**        | 과목별·단원별 정답률을 차트로 시각화합니다                           |
+| **AI 약점 분석**     | 오답 데이터를 GPT-4o에 전달해 취약 단원과 학습 우선순위를 분석합니다 |
+| **AI 문제 생성**     | 취약 단원의 유사 문제를 자동 생성하여 반복 학습 환경을 제공합니다    |
+| **오답 노트**        | 오답 문제에 메모를 추가하고 AI 분석 결과를 저장합니다                |
+| **학습 대시보드**    | 전체 학습 현황, 통계, 추천 콘텐츠를 한눈에 확인합니다                |
+| **자격증 추천**      | 학습 이력을 기반으로 다음에 도전할 자격증을 추천합니다               |
 
 ---
 
 ## 기술 스택
 
 ### Frontend
+
 ![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react)
 ![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite&logoColor=white)
 ![React Router](https://img.shields.io/badge/React_Router-7.14-CA4245?logo=reactrouter&logoColor=white)
@@ -65,6 +66,7 @@
 ![Recharts](https://img.shields.io/badge/Recharts-3.8-22b5bf)
 
 ### Backend
+
 ![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white)
 ![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-6DB33F?logo=springsecurity&logoColor=white)
@@ -72,12 +74,14 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
 
 ### AI Server
+
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991?logo=openai&logoColor=white)
 ![pdfplumber](https://img.shields.io/badge/pdfplumber-0.11-lightgrey)
 
 ### DevOps
+
 ![Docker](https://img.shields.io/badge/Docker_Compose-3-2496ED?logo=docker&logoColor=white)
 
 ---
@@ -178,10 +182,10 @@ VITE_API_BASE_URL=http://localhost:8080
 docker compose up --build
 ```
 
-| 서비스 | URL |
-|--------|-----|
-| 프론트엔드 | http://localhost:3000 |
-| 백엔드 API | http://localhost:8080 |
+| 서비스            | URL                        |
+| ----------------- | -------------------------- |
+| 프론트엔드        | http://localhost:3000      |
+| 백엔드 API        | http://localhost:8080      |
 | AI 서버 (Swagger) | http://localhost:8000/docs |
 
 ```bash
@@ -222,40 +226,65 @@ uvicorn main:app --reload --port 8000
 
 ### 인증
 
-| Method | URL | 설명 |
-|--------|-----|------|
-| POST | `/api/auth/signup` | 회원가입 |
-| POST | `/api/auth/login` | 로그인 (JWT 발급) |
-| GET | `/api/auth/me` | 내 정보 조회 |
+| Method | URL                | 설명              |
+| ------ | ------------------ | ----------------- |
+| POST   | `/api/auth/signup` | 회원가입          |
+| POST   | `/api/auth/login`  | 로그인 (JWT 발급) |
+| GET    | `/api/auth/me`     | 내 정보 조회      |
 
 ### 시험
 
-| Method | URL | 설명 |
-|--------|-----|------|
-| GET | `/api/certifications` | 자격증 목록 |
-| GET | `/api/exams` | 시험 목록 |
-| GET | `/api/exams/{examId}/questions` | 문제 조회 |
+| Method | URL                             | 설명        |
+| ------ | ------------------------------- | ----------- |
+| GET    | `/api/certifications`           | 자격증 목록 |
+| GET    | `/api/exams`                    | 시험 목록   |
+| GET    | `/api/exams/{examId}/questions` | 문제 조회   |
 
 ### 세션 & 통계
 
-| Method | URL | 설명 |
-|--------|-----|------|
-| POST | `/api/sessions/start` | 시험 시작 |
-| POST | `/api/sessions/{sessionId}/submit` | 답안 제출 |
-| GET | `/api/stats` | 과목별·단원별 통계 |
-| GET | `/api/stats/summary` | 학습 요약 |
+| Method | URL                                | 설명               |
+| ------ | ---------------------------------- | ------------------ |
+| POST   | `/api/sessions/start`              | 시험 시작          |
+| POST   | `/api/sessions/{sessionId}/submit` | 답안 제출          |
+| GET    | `/api/stats`                       | 과목별·단원별 통계 |
+| GET    | `/api/stats/summary`               | 학습 요약          |
 
 ### 오답 노트
 
-| Method | URL | 설명 |
-|--------|-----|------|
-| GET | `/api/notes` | 오답 노트 목록 |
-| POST | `/api/notes` | 메모 추가 |
-| PUT | `/api/notes/{memoId}` | 메모 수정 |
+| Method | URL                   | 설명           |
+| ------ | --------------------- | -------------- |
+| GET    | `/api/notes`          | 오답 노트 목록 |
+| POST   | `/api/notes`          | 메모 추가      |
+| PUT    | `/api/notes/{memoId}` | 메모 수정      |
 
 ### AI
 
-| Method | URL | 설명 |
-|--------|-----|------|
-| POST | `/api/ai/analysis` | 취약 단원 AI 분석 |
-| POST | `/api/ai/generate-questions` | AI 유사 문제 생성 |
+| Method | URL                          | 설명              |
+| ------ | ---------------------------- | ----------------- |
+| POST   | `/api/ai/analysis`           | 취약 단원 AI 분석 |
+| POST   | `/api/ai/generate-questions` | AI 유사 문제 생성 |
+
+---
+
+## 팀원 및 역할
+
+| 이름   | 역할             |
+| ------ | ---------------- |
+| 박성훈 | 전체 시스템 개발 |
+| 강민구 | AI 개발          |
+| 유찬양 | 백앤드 개발      |
+
+---
+
+## 프로젝트 일정
+
+- **4/13~4/17** : 요구사항 분석, 기술스택 선정, 기획
+- **4/27~5/1** : 백엔드·DB 구축, 프론트앤드 완성
+- **5/4~5/8** : 백앤드 완성 AI 개발
+- **5/11** : 전체 시스템 완성, 프로젝트 정리
+
+---
+
+## 정보
+
+- **SMU 엔지니어 9기 팀 미니 프로젝트**
