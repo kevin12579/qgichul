@@ -1,5 +1,6 @@
 package com.qgichul.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,6 +20,7 @@ public class Exam {
     // 이 시험은 어느 자격증에 속해있나?
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "certification_id", nullable = false)
+    @JsonIgnore
     private Certification certification;
 
     @Column(nullable = false, length = 200)

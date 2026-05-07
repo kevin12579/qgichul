@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 @Getter @AllArgsConstructor
 public class HistoryDto {
     private Long sessionId;
-    private String examTitle; // 시험지 이름
-    private double score; // 받은 점수
-    private LocalDateTime submittedAt; // 제출 일시
+    private String examTitle;
+    private double score;
+    private LocalDateTime submittedAt;
+    private Integer correctCount;
+    private Integer totalCount;
 }

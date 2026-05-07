@@ -1,5 +1,6 @@
 package com.qgichul.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,10 +16,12 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id")
-    private Exam exam; // <--- qgichul 흔적 제거!
+    private Exam exam;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id")
     private Subject subject;
@@ -41,7 +44,10 @@ public class Question {
     @Column(columnDefinition = "TEXT")
     private String explanation;
 
-    // ⭐️ 새롭게 추가할 부분: 문제 하나를 부르면 밑에 달린 보기(choices)들도 같이 가져오기
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private java.util.List<Choice> choices;
+
+    public String getSubjectName() {
+        return subject != null ? subject.getName() : null;
+    }
 }

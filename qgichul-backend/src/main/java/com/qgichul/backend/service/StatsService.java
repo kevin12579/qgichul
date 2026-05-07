@@ -58,7 +58,13 @@ public class StatsService {
                 ? examSessionRepository.findTop10ByUserEmailAndStatusOrderBySubmittedAtDesc(email, "SUBMITTED")
                 : examSessionRepository.findTop10ByUserEmailAndStatusAndExamCertificationIdOrderBySubmittedAtDesc(email, "SUBMITTED", certId);
         return recentSessions.stream()
-                .map(s -> new HistoryDto(s.getId(), s.getExam().getTitle(), s.getScore(), s.getSubmittedAt()))
+                .map(s -> new HistoryDto(
+                        s.getId(),
+                        s.getExam().getTitle(),
+                        s.getScore(),
+                        s.getSubmittedAt(),
+                        s.getCorrectCount(),
+                        s.getTotalCount()))
                 .collect(Collectors.toList());
     }
 
@@ -66,19 +72,30 @@ public class StatsService {
         List<UserAnswer> allAnswers = certId == null
                 ? userAnswerRepository.findByExamSessionUserEmail(email)
                 : userAnswerRepository.findByExamSessionUserEmailAndExamSessionExamCertificationId(email, certId);
-        Map<String, int[]> unitMap = new HashMap<>(); // [맞힌수, 전체수]
+
+        // subjectName -> unitName -> [맞힌수, 전체수]
+        Map<String, Map<String, int[]>> subjectUnitMap = new HashMap<>();
 
         for (UserAnswer ans : allAnswers) {
+            String subject = ans.getQuestion().getSubject() != null
+                    ? ans.getQuestion().getSubject().getName() : "미분류";
             String unit = ans.getQuestion().getUnit();
-            unitMap.putIfAbsent(unit, new int[]{0, 0});
-            unitMap.get(unit)[1]++;
-            if (Boolean.TRUE.equals(ans.getIsCorrect())) unitMap.get(unit)[0]++;
+            if (unit == null || unit.isBlank()) unit = "미분류";
+
+            subjectUnitMap.computeIfAbsent(subject, k -> new HashMap<>())
+                          .putIfAbsent(unit, new int[]{0, 0});
+            subjectUnitMap.get(subject).get(unit)[1]++;
+            if (Boolean.TRUE.equals(ans.getIsCorrect())) subjectUnitMap.get(subject).get(unit)[0]++;
         }
 
-        return unitMap.entrySet().stream()
-                .map(e -> new UnitStatDto(e.getKey(),
-                        e.getValue()[1] > 0 ? (double) e.getValue()[0] / e.getValue()[1] * 100 : 0,
-                        e.getValue()[1]))
+        return subjectUnitMap.entrySet().stream()
+                .flatMap(subjectEntry -> subjectEntry.getValue().entrySet().stream()
+                        .map(unitEntry -> new UnitStatDto(
+                                subjectEntry.getKey(),
+                                unitEntry.getKey(),
+                                unitEntry.getValue()[1] > 0
+                                        ? (double) unitEntry.getValue()[0] / unitEntry.getValue()[1] * 100 : 0,
+                                unitEntry.getValue()[1])))
                 .collect(Collectors.toList());
     }
 

@@ -9,7 +9,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnitStatDto {
-    private String unitName;    // 단원명
-    private double correctRate; // 정답률
-    private int totalQuestions; // 총 문제 수
+    private String subjectName;  // 과목명
+    private String unitName;     // 단원명
+    private double correctRate;  // 정답률
+    private int totalQuestions;  // 총 문제 수
 }

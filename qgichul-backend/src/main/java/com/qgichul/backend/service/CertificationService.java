@@ -3,32 +3,43 @@ package com.qgichul.backend.service;
 import com.qgichul.backend.entity.Certification;
 import com.qgichul.backend.entity.Exam;
 import com.qgichul.backend.repository.CertificationRepository;
-import com.qgichul.backend.repository.ExamRepository; // ⭐️ 추가
+import com.qgichul.backend.repository.ExamRepository;
+import com.qgichul.backend.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CertificationService {
 
     private final CertificationRepository certificationRepository;
-    private final ExamRepository examRepository; // ⭐️ 추가 (이게 있어야 getExams... 가능)
+    private final ExamRepository examRepository;
+    private final QuestionRepository questionRepository;
 
-    // 전체 자격증 목록 조회
     public List<Certification> getAllCertifications() {
         return certificationRepository.findAll();
     }
 
-    // 자격증 상세 정보 조회 (추가)
     public Certification getCertificationById(Long id) {
         return certificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("자격증 정보를 찾을 수 없습니다."));
     }
 
-    // 해당 자격증에 속한 시험 목록 조회 (추가)
     public List<Exam> getExamsByCertificationId(Long certId) {
-        return examRepository.findByCertificationId(certId);
+        return examRepository.findByCertificationId(certId).stream()
+                .map(e -> Exam.builder()
+                        .id(e.getId())
+                        .certification(e.getCertification())
+                        .title(e.getTitle())
+                        .year(e.getYear())
+                        .session(e.getSession())
+                        .durationMin(e.getDurationMin())
+                        .totalQuestions(questionRepository.countByExamId(e.getId()))
+                        .createdAt(e.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

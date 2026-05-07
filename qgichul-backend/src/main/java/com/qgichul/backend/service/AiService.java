@@ -1,7 +1,6 @@
 package com.qgichul.backend.service;
 
 import com.qgichul.backend.dto.response.AiAnalysisResponse;
-import com.qgichul.backend.dto.response.SubjectStatDto;
 import com.qgichul.backend.entity.AiGeneratedQuestion;
 import com.qgichul.backend.entity.Certification;
 import com.qgichul.backend.entity.Question;
@@ -11,9 +10,9 @@ import com.qgichul.backend.repository.AiGeneratedQuestionRepository;
 import com.qgichul.backend.repository.CertificationRepository;
 import com.qgichul.backend.repository.UserAnswerRepository;
 import com.qgichul.backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -26,32 +25,58 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AiService {
 
     @Value("${ai.server.url}")
     private String aiServerUrl;
 
-    private final RestTemplate restTemplate = new RestTemplate();
-
+    private final RestTemplate restTemplate;
     private final UserRepository userRepository;
     private final CertificationRepository certificationRepository;
     private final AiGeneratedQuestionRepository aiGeneratedQuestionRepository;
     private final UserAnswerRepository userAnswerRepository;
 
-    /**
-     * 가이드 v2 명세 정합:
-     *   - URL: {ai.server.url}/api/ai/analysis
-     *   - payload: { user_id, wrong_answers:[{subject, rate}, ...] }
-     */
-    public AiAnalysisResponse getAnalysisFromAi(String userEmail, List<SubjectStatDto> stats) {
+    public AiService(UserRepository userRepository, CertificationRepository certificationRepository,
+                     AiGeneratedQuestionRepository aiGeneratedQuestionRepository, UserAnswerRepository userAnswerRepository) {
+        this.userRepository = userRepository;
+        this.certificationRepository = certificationRepository;
+        this.aiGeneratedQuestionRepository = aiGeneratedQuestionRepository;
+        this.userAnswerRepository = userAnswerRepository;
+
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5_000);
+        factory.setReadTimeout(55_000);
+        this.restTemplate = new RestTemplate(factory);
+    }
+
+    public AiAnalysisResponse getAnalysisFromAi(String userEmail, List<UserAnswer> wrongAnswers) {
         String endpoint = aiServerUrl + "/api/ai/analysis";
 
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+        if (wrongAnswers.isEmpty()) {
+            AiAnalysisResponse fallback = new AiAnalysisResponse();
+            fallback.setSummary("오답 데이터가 없습니다. 시험을 먼저 풀어주세요.");
+            return fallback;
+        }
+
+        List<Map<String, Object>> wrongAnswerPayload = new ArrayList<>();
+        for (UserAnswer a : wrongAnswers) {
+            Question q = a.getQuestion();
+            Map<String, Object> item = new HashMap<>();
+            item.put("question_id", q.getId());
+            item.put("unit", q.getUnit() != null ? q.getUnit() : "미분류");
+            item.put("subject_name", q.getSubject() != null ? q.getSubject().getName() : "기타");
+            item.put("content", q.getContent());
+            item.put("correct_answer", q.getCorrectAnswer());
+            item.put("selected_answer", a.getSelectedAnswer() != null ? a.getSelectedAnswer() : 0);
+            wrongAnswerPayload.add(item);
+        }
+
         Map<String, Object> payload = new HashMap<>();
-        payload.put("user_id", userEmail);
-        payload.put("wrong_answers", stats.stream()
-                .map(s -> Map.of("subject", s.getSubjectName(), "rate", s.getCorrectRate()))
-                .toList());
+        payload.put("user_id", user.getId());
+        payload.put("wrong_answers", wrongAnswerPayload);
 
         try {
             return restTemplate.postForObject(endpoint, payload, AiAnalysisResponse.class);

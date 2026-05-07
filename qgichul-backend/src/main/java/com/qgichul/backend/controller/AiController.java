@@ -1,7 +1,6 @@
 package com.qgichul.backend.controller;
 
 import com.qgichul.backend.dto.response.AiAnalysisResponse;
-import com.qgichul.backend.dto.response.SubjectStatDto;
 import com.qgichul.backend.entity.AiGeneratedQuestion;
 import com.qgichul.backend.entity.UserAnswer;
 import com.qgichul.backend.repository.AiGeneratedQuestionRepository;
@@ -12,10 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/ai")
@@ -32,27 +29,8 @@ public class AiController {
     @GetMapping("/analysis")
     public ResponseEntity<AiAnalysisResponse> getAiAnalysis(Principal principal) {
         String email = principal.getName();
-
-        List<UserAnswer> answers = userAnswerRepository.findByExamSessionUserEmail(email);
-        Map<String, int[]> statsMap = new HashMap<>();
-        for (UserAnswer answer : answers) {
-            String subjectName = answer.getQuestion().getSubject().getName();
-            statsMap.putIfAbsent(subjectName, new int[]{0, 0});
-            statsMap.get(subjectName)[1]++;
-            if (Boolean.TRUE.equals(answer.getIsCorrect())) {
-                statsMap.get(subjectName)[0]++;
-            }
-        }
-
-        List<SubjectStatDto> userStats = statsMap.entrySet().stream()
-                .map(e -> {
-                    int[] v = e.getValue();
-                    double rate = v[1] > 0 ? Math.round(((double) v[0] / v[1]) * 1000) / 10.0 : 0.0;
-                    return new SubjectStatDto(e.getKey(), rate);
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(aiService.getAnalysisFromAi(email, userStats));
+        List<UserAnswer> wrongAnswers = userAnswerRepository.findByExamSessionUserEmailAndIsCorrectFalse(email);
+        return ResponseEntity.ok(aiService.getAnalysisFromAi(email, wrongAnswers));
     }
 
     /**

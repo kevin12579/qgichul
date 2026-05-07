@@ -31,7 +31,7 @@ public class SessionService {
         ExamSession session = ExamSession.builder()
                 .user(user)
                 .exam(exam)
-                .totalCount(exam.getTotalQuestions())
+                .totalCount(questionRepository.countByExamId(examId))
                 .status("IN_PROGRESS")
                 .startedAt(LocalDateTime.now())
                 .build();
