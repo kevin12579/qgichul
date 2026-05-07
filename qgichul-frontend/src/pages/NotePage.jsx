@@ -19,6 +19,7 @@ export default function NotePage() {
   const [selected, setSelected] = useState(null);
   const [memo, setMemo] = useState('');
   const [sortBy, setSortBy] = useState('latest');
+  const [filterSubject, setFilterSubject] = useState('');
   const [memoSaved, setMemoSaved] = useState(false);
 
   useEffect(() => {
@@ -56,10 +57,14 @@ export default function NotePage() {
     }
   };
 
-  const sortedNotes = [...notes].sort((a, b) => {
-    if (sortBy === 'latest') {
-      return new Date(b.lastWrongAt || 0) - new Date(a.lastWrongAt || 0);
-    }
+  const subjects = [...new Set(notes.map(n => n.subjectName).filter(Boolean))].sort();
+
+  const filteredNotes = filterSubject
+    ? notes.filter(n => n.subjectName === filterSubject)
+    : notes;
+
+  const sortedNotes = [...filteredNotes].sort((a, b) => {
+    if (sortBy === 'latest') return new Date(b.lastWrongAt || 0) - new Date(a.lastWrongAt || 0);
     if (sortBy === 'wrong') return (b.wrongCount || 0) - (a.wrongCount || 0);
     return 0;
   });
@@ -70,11 +75,6 @@ export default function NotePage() {
         <div>
           <div className="main-title">오답 노트</div>
           <div className="main-subtitle">틀린 문제 자동 저장 · 재풀이로 완벽 숙지</div>
-        </div>
-        <div className="hstack">
-          <button className="btn btn-primary" onClick={() => navigate('/exams')}>
-            <Icon name="play" size={14} /> 오답만 재시험
-          </button>
         </div>
       </div>
 
@@ -87,14 +87,26 @@ export default function NotePage() {
         <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 16 }}>
           <div className="card" style={{ padding: 0, maxHeight: 640, overflowY: 'auto' }}>
             <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <b style={{ fontSize: 14 }}>전체 {notes.length}개</b>
+              <b style={{ fontSize: 14 }}>{filterSubject ? `${sortedNotes.length}개` : `전체 ${notes.length}개`}</b>
               <span className="spacer" />
-              <select className="form-input" style={{ height: 30, fontSize: 12, padding: '0 8px', width: 120 }}
+              {subjects.length > 0 && (
+                <select className="form-input" style={{ height: 30, fontSize: 12, padding: '0 8px', width: 110 }}
+                  value={filterSubject} onChange={e => { setFilterSubject(e.target.value); setSelected(null); }}>
+                  <option value="">전체 과목</option>
+                  {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              )}
+              <select className="form-input" style={{ height: 30, fontSize: 12, padding: '0 8px', width: 110 }}
                 value={sortBy} onChange={e => setSortBy(e.target.value)}>
                 <option value="latest">최신순</option>
                 <option value="wrong">오답 많은순</option>
               </select>
             </div>
+            {sortedNotes.length === 0 ? (
+              <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-3)', fontSize: 13 }}>
+                해당 과목의 오답이 없습니다.
+              </div>
+            ) : null}
             {sortedNotes.map((n) => (
               <div key={n.id} onClick={() => setSelected(n)}
                 style={{ padding: 14, borderBottom: '1px solid var(--border)', cursor: 'pointer', background: selected?.id === n.id ? 'var(--primary-50)' : 'transparent', borderLeft: selected?.id === n.id ? '3px solid var(--primary)' : '3px solid transparent' }}>
@@ -157,12 +169,9 @@ export default function NotePage() {
                 />
               </div>
 
-              <div className="hstack" style={{ marginTop: 16, justifyContent: 'flex-end', gap: 8 }}>
+              <div className="hstack" style={{ marginTop: 16, justifyContent: 'flex-end' }}>
                 <button className="btn btn-secondary" onClick={saveMemo}>
                   {memoSaved ? '✓ 저장됨' : '메모 저장'}
-                </button>
-                <button className="btn btn-primary" onClick={() => navigate('/exams')}>
-                  다시 풀기 <Icon name="arrow_right" size={14} />
                 </button>
               </div>
             </div>

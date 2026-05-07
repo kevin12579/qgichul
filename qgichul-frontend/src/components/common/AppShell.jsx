@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from './Icon';
 
@@ -14,6 +15,14 @@ function TopNav({ user, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const current = location.pathname.split('/')[1] || 'dashboard';
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/exams?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   const links = [
     { id: 'dashboard', label: '홈' },
@@ -42,11 +51,13 @@ function TopNav({ user, onLogout }) {
       <div className="nav-right">
         <div className="nav-search">
           <span className="search-icon"><Icon name="search" size={16} color="var(--text-4)" /></span>
-          <input placeholder="자격증·시험·단원 검색" />
+          <input
+            placeholder="자격증·시험·단원 검색"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearch}
+          />
         </div>
-        <button className="btn btn-ghost btn-sm" style={{ padding: '0 8px' }}>
-          <Icon name="bell" size={18} />
-        </button>
         <span className="nav-plan-badge free">FREE</span>
         <div className="avatar" onClick={() => navigate('/mypage')} title={user?.nickname || '내 정보'}>
           {(user?.nickname || user?.name || 'U')[0]}

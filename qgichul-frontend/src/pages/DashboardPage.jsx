@@ -47,14 +47,9 @@ export default function DashboardPage() {
           <div className="main-title">안녕하세요, {user?.nickname || user?.name || '학습자'}님</div>
           <div className="main-subtitle">실제 응시 데이터 기반 학습 현황</div>
         </div>
-        <div className="hstack">
-          <button className="btn btn-secondary" onClick={() => navigate('/exams')}>
-            <Icon name="book" size={16} /> 시험 선택
-          </button>
-          <button className="btn btn-primary" onClick={() => navigate('/exams')}>
-            <Icon name="play" size={16} /> 실전 모의고사 시작
-          </button>
-        </div>
+        <button className="btn btn-primary" onClick={() => navigate('/exams')}>
+          <Icon name="play" size={16} /> 실전 모의고사 시작
+        </button>
       </div>
 
       <div className="grid grid-2" style={{ marginBottom: 20 }}>
@@ -89,6 +84,7 @@ export default function DashboardPage() {
                       <td>
                         <b style={{ color: passed ? 'var(--success)' : 'var(--danger)' }}>{Math.round(a.score ?? 0)}점</b>
                         <span className="muted" style={{ fontSize: 11, marginLeft: 4 }}>{passed ? '합격' : '불합격'}</span>
+                        <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{a.correctCount ?? 0}/{a.totalCount ?? 0}문항</div>
                       </td>
                       <td className="muted small">{formatDate(a.submittedAt)}</td>
                     </tr>

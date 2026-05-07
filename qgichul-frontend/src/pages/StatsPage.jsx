@@ -22,19 +22,23 @@ export default function StatsPage() {
   const [certs, setCerts] = useState([]);
   const [certId, setCertId] = useState(null);
   const [subjectData, setSubjectData] = useState([]);
-  const [weakUnits, setWeakUnits] = useState([]);
   const [history, setHistory] = useState([]);
   const [summary, setSummary] = useState({ totalExamsTaken: 0, overallCorrectRate: 0 });
 
   useEffect(() => {
     authApi.getMe().then(setUser).catch(() => setUser({ nickname: '학습자' }));
-    statsApi.getCertsTaken().then(data => setCerts(data || [])).catch(() => setCerts([]));
+    statsApi.getCertsTaken()
+      .then(data => {
+        const list = data || [];
+        setCerts(list);
+        if (list.length > 0) setCertId(list[0].id);
+      })
+      .catch(() => setCerts([]));
   }, []);
 
   useEffect(() => {
     statsApi.getSummary(certId).then(setSummary).catch(() => {});
     statsApi.getSubjectStats(certId).then(data => setSubjectData(data || [])).catch(() => setSubjectData([]));
-    statsApi.getUnitStats(certId).then(data => setWeakUnits(data || [])).catch(() => setWeakUnits([]));
     statsApi.getHistory(certId).then(data => setHistory(data || [])).catch(() => setHistory([]));
   }, [certId]);
 
@@ -44,8 +48,8 @@ export default function StatsPage() {
   const historyData = [...history]
     .reverse()
     .map(h => ({ date: formatShortDate(h.submittedAt), accuracy: Math.round(h.score ?? 0) }));
-  const topWeak = [...weakUnits]
-    .filter(u => u.totalQuestions > 0)
+  const topWeakSubjects = [...subjectData]
+    .filter(s => s.subjectName && s.subjectName !== '미분류' && (s.totalCount ?? 0) > 0)
     .sort((a, b) => a.correctRate - b.correctRate)
     .slice(0, 5);
   const passCount = history.filter(h => (h.score ?? 0) >= PASS_SCORE).length;
@@ -59,19 +63,18 @@ export default function StatsPage() {
           <div className="main-title">성적 통계</div>
           <div className="main-subtitle">내 학습 데이터 기반 약점 분석 · 합격률 예측</div>
         </div>
-        <div className="segmented">
-          <button className={certId === null ? 'active' : ''} onClick={() => setCertId(null)}>전체</button>
-          {certs.map(c => (
-            <button key={c.id} className={certId === c.id ? 'active' : ''} onClick={() => setCertId(c.id)}>{c.name}</button>
-          ))}
-        </div>
+        {certs.length > 1 && (
+          <div className="segmented">
+            {certs.map(c => (
+              <button key={c.id} className={certId === c.id ? 'active' : ''} onClick={() => setCertId(c.id)}>{c.name}</button>
+            ))}
+          </div>
+        )}
       </div>
 
       {summary.totalExamsTaken === 0 ? (
         <div className="card" style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>
-          {certId === null
-            ? '아직 응시한 시험이 없습니다. 시험을 풀고 다시 확인해 주세요.'
-            : '선택한 자격증의 응시 기록이 없습니다.'}
+          선택한 자격증의 응시 기록이 없습니다.
         </div>
       ) : (
         <>
@@ -142,17 +145,29 @@ export default function StatsPage() {
           <div className="grid grid-2" style={{ gap: 16 }}>
             <div className="card">
               <div className="card-header">
-                <div className="card-title">🎯 취약 단원 TOP 5</div>
+                <div className="card-title">🎯 취약 과목 TOP 5</div>
                 <button className="btn btn-secondary btn-sm" onClick={() => navigate('/notes')}>오답 재시험</button>
               </div>
-              {topWeak.length === 0 ? (
+              {topWeakSubjects.length === 0 ? (
                 <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-3)', fontSize: 13 }}>
-                  단원별 데이터가 부족합니다.
+                  과목별 데이터가 부족합니다.
                 </div>
-              ) : topWeak.map(u => {
-                const acc = Math.round(u.correctRate ?? 0);
+              ) : topWeakSubjects.map((s, i) => {
+                const acc = Math.round(s.correctRate ?? 0);
                 return (
-                  <HBar key={u.unitName} label={u.unitName} value={acc} color={acc < 50 ? 'var(--danger)' : 'var(--warning)'} />
+                  <div key={s.subjectName} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < topWeakSubjects.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                    <div style={{ width: 22, height: 22, borderRadius: '50%', background: i < 3 ? 'var(--danger-50)' : 'var(--bg)', color: i < 3 ? 'var(--danger)' : 'var(--text-3)', display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: 11, flexShrink: 0 }}>{i + 1}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13.5, marginBottom: 4 }} className="truncate">{s.subjectName}</div>
+                      <div className="progress" style={{ height: 4 }}>
+                        <div className={`progress-bar ${acc < 50 ? 'danger' : 'warning'}`} style={{ width: `${acc}%` }} />
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: acc < 50 ? 'var(--danger)' : 'var(--warning)' }}>{acc}%</div>
+                      <div className="muted small">{s.totalCount}문항</div>
+                    </div>
+                  </div>
                 );
               })}
             </div>

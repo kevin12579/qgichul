@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppShell from '../components/common/AppShell';
 import Icon from '../components/common/Icon';
 import { authApi } from '../api/authApi';
@@ -8,6 +8,8 @@ import { sessionApi } from '../api/sessionApi';
 
 export default function ExamSelectPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('q') || '';
   const [user, setUser] = useState(null);
   const [certs, setCerts] = useState([]);
   const [exams, setExams] = useState([]);
@@ -34,11 +36,15 @@ export default function ExamSelectPage() {
 
   const handleLogout = () => { localStorage.removeItem('accessToken'); navigate('/login'); };
 
+  const filteredCerts = searchQuery
+    ? certs.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : certs;
+
   const startExam = async (examId) => {
     setLoading(true);
     try {
       const session = await sessionApi.startExam(examId);
-      navigate(`/exam/${examId}?sessionId=${session.id}&mode=${mode}`);
+      navigate(`/exam/${examId}?sessionId=${session.sessionId}&mode=${mode}`);
     } catch {
       navigate(`/exam/${examId}?mode=${mode}`);
     } finally {
@@ -66,50 +72,64 @@ export default function ExamSelectPage() {
         </div>
       ) : (
         <>
-          <div className="hstack" style={{ gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
-            {certs.map(c => (
-              <div key={c.id} className={`chip ${selectedCert === c.id ? 'active' : ''}`} onClick={() => setSelectedCert(c.id)}>
-                {c.name}
-              </div>
-            ))}
-          </div>
-
-          <div style={{ padding: '14px 18px', borderRadius: 10, background: mode === 'exam' ? '#fef2f2' : '#f0fdf4', border: `1px solid ${mode === 'exam' ? '#fecaca' : '#bbf7d0'}`, marginBottom: 20, display: 'flex', gap: 12, alignItems: 'center' }}>
-            <Icon name={mode === 'exam' ? 'clock' : 'book'} size={22} color={mode === 'exam' ? 'var(--danger)' : 'var(--success)'} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700, fontSize: 13.5 }}>
-                {mode === 'exam' ? '시험 모드' : '연습 모드'}: {mode === 'exam' ? '실전과 동일한 환경' : '개념 이해에 집중'}
-              </div>
-              <div style={{ fontSize: 12.5, color: 'var(--text-2)', marginTop: 2 }}>
-                {mode === 'exam'
-                  ? '타이머가 작동하며, 제출 후에만 정답·해설을 확인할 수 있습니다.'
-                  : '타이머 없음. 문항별 즉시 채점 + 해설 즉시 공개. 반복 학습에 적합합니다.'}
-              </div>
+          {searchQuery && (
+            <div style={{ marginBottom: 12, fontSize: 13, color: 'var(--text-3)' }}>
+              "{searchQuery}" 검색 결과 {filteredCerts.length}개
             </div>
-          </div>
-
-          {exams.length === 0 ? (
+          )}
+          {filteredCerts.length === 0 ? (
             <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>
-              <Icon name="book" size={40} />
-              <div style={{ marginTop: 12 }}>해당 자격증의 시험 목록이 없습니다.</div>
+              <Icon name="search" size={40} />
+              <div style={{ marginTop: 12 }}>"{searchQuery}"에 해당하는 자격증이 없습니다.</div>
             </div>
           ) : (
-            <div className="grid grid-3">
-              {exams.map(e => (
-                <div key={e.id} className="exam-card" onClick={() => !loading && startExam(e.id)}>
-                  <div className="exam-card-header">
-                    <span className="exam-category">{e.year}년 {e.session}회차</span>
-                    <span className={`mode-ribbon ${mode}`}>{mode === 'exam' ? '시험' : '연습'}</span>
+            <>
+              <div className="hstack" style={{ gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
+                {filteredCerts.map(c => (
+                  <div key={c.id} className={`chip ${selectedCert === c.id ? 'active' : ''}`} onClick={() => setSelectedCert(c.id)}>
+                    {c.name}
                   </div>
-                  <div className="exam-card-title">{e.title}</div>
-                  <div className="exam-card-meta">CBT 기출</div>
-                  <div className="exam-stats">
-                    <div className="exam-stat">문항수<b>{e.totalQuestions}</b></div>
-                    <div className="exam-stat">시험시간<b>{e.durationMin}분</b></div>
+                ))}
+              </div>
+
+              <div style={{ padding: '14px 18px', borderRadius: 10, background: mode === 'exam' ? '#fef2f2' : '#f0fdf4', border: `1px solid ${mode === 'exam' ? '#fecaca' : '#bbf7d0'}`, marginBottom: 20, display: 'flex', gap: 12, alignItems: 'center' }}>
+                <Icon name={mode === 'exam' ? 'clock' : 'book'} size={22} color={mode === 'exam' ? 'var(--danger)' : 'var(--success)'} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13.5 }}>
+                    {mode === 'exam' ? '시험 모드' : '연습 모드'}: {mode === 'exam' ? '실전과 동일한 환경' : '개념 이해에 집중'}
+                  </div>
+                  <div style={{ fontSize: 12.5, color: 'var(--text-2)', marginTop: 2 }}>
+                    {mode === 'exam'
+                      ? '타이머가 작동하며, 제출 후에만 정답·해설을 확인할 수 있습니다.'
+                      : '타이머 없음. 문항별 즉시 채점 + 해설 즉시 공개. 반복 학습에 적합합니다.'}
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+
+              {exams.length === 0 ? (
+                <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>
+                  <Icon name="book" size={40} />
+                  <div style={{ marginTop: 12 }}>해당 자격증의 시험 목록이 없습니다.</div>
+                </div>
+              ) : (
+                <div className="grid grid-3">
+                  {exams.map(e => (
+                    <div key={e.id} className="exam-card" onClick={() => !loading && startExam(e.id)}>
+                      <div className="exam-card-header">
+                        <span className="exam-category">{e.year}년 {e.session}회차</span>
+                        <span className={`mode-ribbon ${mode}`}>{mode === 'exam' ? '시험' : '연습'}</span>
+                      </div>
+                      <div className="exam-card-title">{e.title}</div>
+                      <div className="exam-card-meta">CBT 기출</div>
+                      <div className="exam-stats">
+                        <div className="exam-stat">문항수<b>{e.totalQuestions}</b></div>
+                        <div className="exam-stat">시험시간<b>{e.durationMin}분</b></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </>
       )}
