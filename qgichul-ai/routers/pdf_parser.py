@@ -17,6 +17,7 @@ PDF 형식 가정 (comcbt.com 산업기사/기사 시리즈):
   예:  정보처리산업기사_2020_3.pdf  +  정보처리산업기사_2020_3_해설.pdf
 """
 
+import os
 import re
 import io
 from pathlib import Path
@@ -137,6 +138,31 @@ async def parse_pdf_folder(folder: str = "pdfs"):
     return results
 
 
+@router.post("/import", summary="폴더 내 PDF 파싱 후 백엔드 DB로 저장")
+async def import_pdfs_to_db(folder: str = "pdfs"):
+    """
+    `folder`의 PDF를 파싱하고 곧바로 Spring Boot 백엔드에 저장합니다.
+    내부적으로 백엔드의 `/api/admin/import-pdfs`를 호출합니다 (백엔드가 다시 본 서버의
+    `/parse-folder`를 호출하는 구조이므로 트리거 역할).
+
+    백엔드 URL은 `BACKEND_URL` 환경변수로 지정하세요. (기본값: http://backend:8080)
+    """
+    import httpx
+
+    backend_url = os.getenv("BACKEND_URL", "http://backend:8080").rstrip("/")
+    async with httpx.AsyncClient(timeout=120) as client:
+        try:
+            resp = await client.post(
+                f"{backend_url}/api/admin/import-pdfs",
+                params={"folder": folder},
+            )
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=502, detail=f"백엔드에 연결 실패: {e}")
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
+    return resp.json()
+
+
 def _parse_filename(name: str):
     """`{자격증명}_{연도}_{회차}.pdf`에서 메타정보 추출."""
     stem = Path(name).stem
@@ -220,20 +246,18 @@ def _strip_footers(text: str) -> str:
 
 
 def _parse_questions(chunk: str, expl_map: dict[int, str]) -> list[ParsedQuestion]:
-    """과목 chunk → 문제 리스트."""
-    seen: set[int] = set()
+    """과목 chunk → 문제 리스트. q_num은 단조증가만 인정해 페이지번호·정답표 grid 오인을 차단."""
     questions: list[ParsedQuestion] = []
+    last = 0
     for m in QUESTION_RE.finditer(chunk):
         q_num = int(m.group(1))
-        # 1~100 범위 밖이거나 중복은 무시 (정답표의 1~100 같은 grid 매치 방지)
-        if q_num < 1 or q_num > 200 or q_num in seen:
+        if q_num <= last or q_num > 200:
             continue
         body = m.group(2)
         content, choices, correct = _parse_question_body(body)
-        # 보기가 4개 안 잡히면 (그림 문제 등) 건너뛰지 않고 부분 결과 유지
         if not content:
             continue
-        seen.add(q_num)
+        last = q_num
         questions.append(ParsedQuestion(
             question_num=q_num,
             content=content,
@@ -283,6 +307,10 @@ def _parse_question_body(body: str):
 
     choices.sort(key=lambda c: c.choice_num)
 
+    # 그림 문제: 보기 텍스트가 모두 비어있으면 placeholder 삽입
+    if choices and all(not c.content for c in choices):
+        choices = [ChoiceItem(choice_num=c.choice_num, content="[그림 참조]") for c in choices]
+
     if correct == 0:
         correct = 1  # 정답 표시 누락 시 fallback
 
@@ -309,32 +337,66 @@ def _estimate_difficulty(body: str) -> int:
 # 해설집 PDF 파싱
 # ─────────────────────────────────────────────────────────
 
-EXPLANATION_BLOCK_RE = re.compile(
-    r'<\s*문제\s*해설\s*>(.+?)(?=(?:\n\s*\d{1,3}\.\s+)|\Z)',
-    re.DOTALL,
-)
+EXPL_HEADER_RE = re.compile(r'(?:^|\n)\s*(\d{1,3})\.\s+')
+EXPL_MARKER_RE = re.compile(r'<\s*문제\s*해설\s*>')
 
 
 def _parse_explanations(raw_bytes: bytes) -> dict[int, str]:
-    """해설집 PDF → {question_num: explanation} 매핑."""
+    """
+    해설집 PDF → {question_num: explanation} 매핑.
+
+    해설집은 본문이 다음 구조로 반복됩니다:
+        N. 문제 본문
+        ① ② ③ ④ 보기
+        <문제 해설>
+        해설 텍스트...
+        [해설작성자 : ...]
+
+    해설 본문 안에 "3. 일반 사용자도..." 처럼 숫자로 시작하는 줄이 있을 수 있어
+    문제 헤더 정규식 매치만으로는 잘못 잘릴 수 있습니다.
+    따라서 `<문제 해설>` 마커마다 그 직전에 등장한 가장 가까운 문제 헤더의 번호에
+    매핑합니다.
+    """
     text = _extract_text_columns(raw_bytes)
     text = _strip_footers(text)
 
+    # 해설 본문 안의 "3. ..." 같은 가짜 헤더는 prev+1 규칙으로 거른다
+    # (시험 문제는 1→2→3→... 순서대로 빠짐없이 등장)
+    raw_headers = [(m.start(), int(m.group(1))) for m in EXPL_HEADER_RE.finditer(text)]
+    headers: list[tuple[int, int]] = []
+    expected = 1
+    for pos, num in raw_headers:
+        if num == expected:
+            headers.append((pos, num))
+            expected = num + 1
+
+    markers = [m.start() for m in EXPL_MARKER_RE.finditer(text)]
+    if not headers or not markers:
+        return {}
+
     expl_map: dict[int, str] = {}
-    # 각 문제 블록마다 <문제 해설> 이후 텍스트가 해설
-    for m in QUESTION_RE.finditer(text):
-        q_num = int(m.group(1))
-        if q_num < 1 or q_num > 200:
+    next_marker_pos = markers + [len(text)]
+
+    for i, mpos in enumerate(markers):
+        # 직전 진짜 헤더 번호
+        owner = None
+        for hpos, hnum in reversed(headers):
+            if hpos < mpos:
+                owner = hnum
+                break
+        if owner is None:
             continue
-        body = m.group(2)
-        em = EXPLANATION_BLOCK_RE.search("\n" + body)
-        if not em:
-            continue
-        raw = em.group(1).strip()
-        # [해설작성자 : ...] 마커 단위로 통합 (여러 해설이 이어질 수 있음 → 모두 포함)
-        cleaned = re.sub(r'\n{2,}', '\n', raw).strip()
-        if cleaned and q_num not in expl_map:
-            expl_map[q_num] = cleaned
+        end = next_marker_pos[i + 1]
+        start = text.find(">", mpos) + 1
+        body = text[start:end]
+        # 본문 끝은 (다음 진짜 헤더) 또는 (다음 마커) 중 가까운 쪽
+        for hpos, _ in headers:
+            if hpos > mpos and hpos < end:
+                body = text[start:hpos]
+                break
+        cleaned = re.sub(r'\n{2,}', '\n', body).strip()
+        if cleaned and owner not in expl_map:
+            expl_map[owner] = cleaned
     return expl_map
 
 
