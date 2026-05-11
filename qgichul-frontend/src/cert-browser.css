@@ -1,0 +1,167 @@
+
+/* ====================== Cert Browser (ExamSelectPage 2단 + 아코디언) ====================== */
+
+.cert-browser {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+  min-height: 540px;
+}
+
+/* 좌측 카테고리 패널 */
+.cert-category-panel {
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  background: var(--bg-soft);
+}
+
+/* 우측 패널 (자격증 + 시험 아코디언) */
+.cert-right-panel {
+  overflow-y: auto;
+  background: var(--surface);
+}
+
+/* 패널 공통 타이틀 */
+.cert-panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-4);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: inherit;
+  z-index: 2;
+}
+
+/* ── 카테고리 아이템 ── */
+.cert-category-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  text-align: left;
+  transition: background .1s, color .1s;
+}
+.cert-category-item:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+.cert-category-item.active {
+  background: var(--primary-50);
+  color: var(--primary-700);
+  font-weight: 600;
+  border-left: 3px solid var(--primary);
+  padding-left: 11px;
+}
+
+/* ── 자격증 아코디언 ── */
+.cert-accordion {
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-accordion-item {
+  border-bottom: 1px solid var(--border);
+}
+.cert-accordion-item:last-child {
+  border-bottom: none;
+}
+
+/* 자격증 행 버튼 */
+.cert-accordion-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 13px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 8px;
+  transition: background .1s;
+}
+.cert-accordion-trigger:hover {
+  background: var(--bg);
+}
+.cert-accordion-item.open > .cert-accordion-trigger {
+  background: var(--primary-50);
+  color: var(--primary-700);
+}
+
+.cert-accordion-name {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: inherit;
+  flex: 1;
+  line-height: 1.4;
+}
+.cert-accordion-item.open .cert-accordion-name {
+  font-weight: 600;
+}
+
+/* 시험 목록 바디 */
+.cert-accordion-body {
+  background: var(--bg-soft);
+  border-top: 1px solid var(--border);
+  padding: 16px 18px 20px;
+  animation: slideDown .18s ease;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 시험 카드 그리드 */
+.cert-exam-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+/* 스피너 (소형) */
+.spinner-sm {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── 반응형 ── */
+@media (max-width: 760px) {
+  .cert-browser {
+    grid-template-columns: 1fr;
+  }
+  .cert-category-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .cert-category-item {
+    flex: 1 1 auto;
+    min-width: 140px;
+  }
+  .cert-exam-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

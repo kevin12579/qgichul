@@ -5,10 +5,7 @@ import com.qgichul.backend.entity.Exam;
 import com.qgichul.backend.service.CertificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,5 +29,31 @@ public class CertificationController {
     @GetMapping("/{id}/exams")
     public ResponseEntity<List<Exam>> getExamsByCert(@PathVariable Long id) {
         return ResponseEntity.ok(certificationService.getExamsByCertificationId(id));
+    }
+
+    // 카테고리 목록
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getCategories() {
+        return ResponseEntity.ok(certificationService.getAllCategories());
+    }
+
+    // 카테고리별 등급 목록
+    @GetMapping("/grades")
+    public ResponseEntity<List<String>> getGrades(@RequestParam String category) {
+        return ResponseEntity.ok(certificationService.getGradesByCategory(category));
+    }
+
+    // 카테고리 + 등급으로 자격증 목록
+    @GetMapping("/by-grade")
+    public ResponseEntity<List<Certification>> getCertsByGrade(
+            @RequestParam String category,
+            @RequestParam String grade) {
+        return ResponseEntity.ok(certificationService.getCertificationsByCategoryAndGrade(category, grade));
+    }
+
+    // 카테고리별 전체 자격증 (fallback)
+    @GetMapping("/by-category")
+    public ResponseEntity<List<Certification>> getCertsByCategory(@RequestParam String category) {
+        return ResponseEntity.ok(certificationService.getCertificationsByCategory(category));
     }
 }

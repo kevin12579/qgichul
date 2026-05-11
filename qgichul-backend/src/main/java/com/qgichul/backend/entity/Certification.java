@@ -21,6 +21,11 @@ public class Certification {
     @Column(nullable = false, length = 50)
     private String category;
 
+    // 기사 / 산업기사 / 기능사 / 기타
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private String grade = "기타";
+
     @Column(columnDefinition = "TEXT")
     private String description;
 }

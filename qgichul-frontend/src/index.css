@@ -527,3 +527,107 @@ a { color: inherit; text-decoration: none; }
 .exam-stats { display: flex; gap: 16px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); }
 .exam-stat { font-size: 11px; color: var(--text-3); }
 .exam-stat b { color: var(--text); font-size: 14px; display: block; margin-top: 2px; }
+
+
+/* ===== 시험선택 3단 패널 ===== */
+.cert-browser {
+  display: grid;
+  grid-template-columns: 200px 160px 1fr;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.cert-panel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+}
+.cert-panel:last-child { border-right: none; }
+
+.cert-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-4);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-soft);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.cert-panel-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.cert-panel-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.cert-panel-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  text-align: left;
+  transition: background .1s, color .1s;
+}
+.cert-panel-item:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+.cert-panel-item.active {
+  background: var(--primary-50);
+  color: var(--primary-700);
+  font-weight: 600;
+  border-left: 3px solid var(--primary);
+  padding-left: 11px;
+}
+
+.cert-panel-empty {
+  padding: 20px 14px;
+  font-size: 12px;
+  color: var(--text-4);
+}
+
+.spinner-sm {
+  display: inline-block;
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 860px) {
+  .cert-browser { grid-template-columns: 1fr; }
+  .cert-panel { border-right: none; border-bottom: 1px solid var(--border); max-height: 200px; }
+}

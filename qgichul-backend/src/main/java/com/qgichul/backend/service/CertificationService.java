@@ -42,4 +42,24 @@ public class CertificationService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    // 카테고리 목록
+    public List<String> getAllCategories() {
+        return certificationRepository.findDistinctCategories();
+    }
+
+    // 카테고리별 등급 목록
+    public List<String> getGradesByCategory(String category) {
+        return certificationRepository.findDistinctGradesByCategory(category);
+    }
+
+    // 카테고리 + 등급으로 자격증 목록
+    public List<Certification> getCertificationsByCategoryAndGrade(String category, String grade) {
+        return certificationRepository.findByCategoryAndGradeOrderByNameAsc(category, grade);
+    }
+
+    // 카테고리별 전체 자격증
+    public List<Certification> getCertificationsByCategory(String category) {
+        return certificationRepository.findByCategoryOrderByNameAsc(category);
+    }
 }

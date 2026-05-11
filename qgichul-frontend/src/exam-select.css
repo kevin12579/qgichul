@@ -1,0 +1,143 @@
+/* ====================== ExamSelectPage 3단계 선택 UI ====================== */
+
+/* 전체 선택 박스 */
+.es-selector-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+/* 각 단계 */
+.es-step {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.es-step:last-child {
+  border-bottom: none;
+}
+
+/* 단계 레이블 */
+.es-step-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.es-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* STEP 1: 카테고리 그리드 */
+.es-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.es-category-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.es-category-btn:hover {
+  border-color: var(--primary-300);
+  background: var(--primary-50);
+  color: var(--text);
+}
+.es-category-btn.active {
+  border-color: var(--primary);
+  background: var(--primary-50);
+  color: var(--primary-700);
+  font-weight: 600;
+}
+
+/* STEP 3: 자격증 목록 */
+.es-cert-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.es-cert-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.es-cert-btn:hover {
+  border-color: var(--primary-300);
+  background: var(--primary-50);
+  color: var(--text);
+}
+.es-cert-btn.active {
+  border-color: var(--primary);
+  background: var(--primary-50);
+  color: var(--primary-700);
+  font-weight: 600;
+}
+
+/* 스피너 */
+.spinner-sm {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 시험 카드 3열 그리드 */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+/* 반응형 */
+@media (max-width: 900px) {
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .es-category-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .grid-3 { grid-template-columns: 1fr; }
+  .es-category-grid { grid-template-columns: repeat(2, 1fr); }
+}
