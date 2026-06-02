@@ -6,6 +6,15 @@
 
 오답을 분석하고, 취약점을 파악하고, AI가 맞춤 문제를 생성해 드립니다.
 
+---
+
+<p align="center">
+  <a href="https://github.com/kevin12579/qgichul/blob/main/docs/intro.pdf" target="_blank">
+    <img src="https://img.shields.io/badge/PDF%20Presentation-프로젝트%20소개%20PPT%20보기-blue?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="QGICHUL PPT"/>
+  </a>
+</p>
+---
+
 <br/>
 
 ![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)
