@@ -34,7 +34,15 @@
       "Bash(curl *)",
       "Bash(git rm *)",
       "Bash(git commit *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git push *)",
+      "WebFetch(domain:velog.io)",
+      "WebFetch(domain:medium.com)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\kevin\\\\OneDrive\\\\Desktop\\\\smu\\\\dev_source\\\\GitWork\\\\qgichul\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "PowerShell(Test-Path \"C:\\\\Users\\\\kevin\\\\OneDrive\\\\Desktop\\\\smu\\\\dev_source\\\\GitWork\\\\qgichul\"; Get-ChildItem -Path \"C:\\\\Users\\\\kevin\\\\OneDrive\\\\Desktop\\\\smu\\\\dev_source\\\\GitWork\\\\qgichul\" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })",
+      "Bash(git pull *)",
+      "Bash(git stash *)"
     ]
   }
 }
